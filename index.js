@@ -3,7 +3,7 @@ import express from 'express'
 const app = express()
 
 app.get('/', (req,res) =>{
-    res.status(200).send('Hola')
+    res.status(200).send('Hello World I am Joseph')
 });
 
 // Iniciar el servidor en un puerto específico
