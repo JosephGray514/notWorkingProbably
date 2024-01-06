@@ -144,7 +144,7 @@ const ai = async (question) => {
   });
 
   const response = await chain.call({
-    query: "Como puedo contactarlos?",
+    query: question,
   });
 
   let answer = response.text;
