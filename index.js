@@ -72,14 +72,15 @@ app.post("/webhook", (req, res) => {
   }
 });
 
-function handleMessages(sender_psid, received_message) {
+async function handleMessages(sender_psid, received_message) {
   let response;
   if (received_message.text) {
     const answer = received_message.text;
     console.log("Hola! Estoy en el handleMessage" + "\n");
     console.log("Este es el answer: " + answer + "\n");
+    const  aiRespond = await ai(answer)
     response = {
-      text: "Tu mensaje fue: " + answer,
+      text: aiRespond,
     };
   }
   callSendAPI(sender_psid, response);
