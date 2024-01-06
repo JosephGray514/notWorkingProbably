@@ -1,4 +1,5 @@
 import express from "express";
+import bodyParser from 'body-parser'
 import { config } from "dotenv";
 config();
 
@@ -12,7 +13,7 @@ import { FaissStore } from "langchain/vectorstores/faiss";
 import { OpenAI } from "langchain/llms/openai";
 import { RetrievalQAChain, loadQAStuffChain } from "langchain/chains";
 
-const app = express();
+const app = express().use(bodyParser.json());
 
 // Ruta para el método GET
 app.get("/webhook", (req, res) => {
