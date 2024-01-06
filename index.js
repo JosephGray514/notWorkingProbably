@@ -38,37 +38,32 @@ app.get("/webhook", (req, res) => {
 
 // Ruta para el método POST
 app.post("/webhook", (req, res) => {
-    console.log('POST: webhook');
+  console.log("POST: webhook");
 
-    let body = req.body;
+  let body = req.body;
 
-    if(body.object === 'page'){
-        body.entry.forEach(function (entry) {
-            // Gets the body of the webhook event
-            let webhook_event = entry.messaging[0];
-            // console.log(webhook_event);
+  if (body.object === "page") {
+    body.entry.forEach(function (entry) {
+      // Gets the body of the webhook event
+      let webhook_event = entry.messaging[0];
+      // console.log(webhook_event);
 
-            // Get the sender PSID
-            let sender_psid = webhook_event.sender.id;
-            console.log('Sender PSID: ' + sender_psid +'  //');
+      // Get the sender PSID
+      let sender_psid = webhook_event.sender.id;
+      console.log("Sender PSID: " + sender_psid + "  //");
 
-            // Get the message sent
-            let text = webhook_event.message.text
-            console.log('Text: '+ text +'  //')
+      // Get the message sent
+      let text = webhook_event.message.text;
+      console.log("Text: " + text + "  //");
 
-            if (webhook_event.message) {
-                handleMessages(sender_psid, webhook_event.message)
-            }else if (webhook_event.postback) {
-                handlePostBack(sender_psid,webhook_event.postback)
-            }
-        });
-        res.status(200).send('EVENTO RECIBIDO')
-    }else{
-        res.sendStatus(404);
-    }
+    });
+    res.status(200).send("EVENTO RECIBIDO");
+  } else {
+    res.sendStatus(404);
+  }
 });
 
-app.get("/", async (req, res) => {
+const ai = async (question) => {
   const loader = new TextLoader("./Texto.txt");
 
   const docs = await loader.load();
@@ -102,7 +97,13 @@ app.get("/", async (req, res) => {
     query: "Como puedo contactarlos?",
   });
 
-  res.status(200).send(response.text);
+  let answer = response.text;
+
+  return answer;
+};
+
+app.get("/", async (req, res) => {
+  res.status(200).send("Hola");
 });
 
 // Iniciar el servidor en un puerto específico
