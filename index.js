@@ -38,7 +38,34 @@ app.get("/webhook", (req, res) => {
 
 // Ruta para el método POST
 app.post("/webhook", (req, res) => {
+    console.log('POST: webhook');
 
+    let body = req.body;
+
+    if(body.object === 'page'){
+        body.entry.forEach(function (entry) {
+            // Gets the body of the webhook event
+            let webhook_event = entry.messaging[0];
+            // console.log(webhook_event);
+
+            // Get the sender PSID
+            let sender_psid = webhook_event.sender.id;
+            console.log('Sender PSID: ' + sender_psid +'  //');
+
+            // Get the message sent
+            let text = webhook_event.message.text
+            console.log('Text: '+ text +'  //')
+
+            if (webhook_event.message) {
+                handleMessages(sender_psid, webhook_event.message)
+            }else if (webhook_event.postback) {
+                handlePostBack(sender_psid,webhook_event.postback)
+            }
+        });
+        res.status(200).send('EVENTO RECIBIDO')
+    }else{
+        res.sendStatus(404);
+    }
 });
 
 app.get("/", async (req, res) => {
