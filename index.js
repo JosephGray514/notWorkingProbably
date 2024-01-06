@@ -1,5 +1,5 @@
 import express from "express";
-import bodyParser from 'body-parser'
+import bodyParser from "body-parser";
 import { config } from "dotenv";
 config();
 
@@ -14,6 +14,8 @@ import { OpenAI } from "langchain/llms/openai";
 import { RetrievalQAChain, loadQAStuffChain } from "langchain/chains";
 
 const app = express().use(bodyParser.json());
+
+const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
 // Ruta para el método GET
 app.get("/webhook", (req, res) => {
@@ -44,10 +46,10 @@ app.post("/webhook", (req, res) => {
   const body = req.body;
 
   if (body.object === "page") {
-    body.entry.forEach(entry =>{
+    body.entry.forEach((entry) => {
       // Gets the body of the webhook event
       let webhook_event = entry.messaging[0];
-      // console.log(webhook_event);
+      console.log(webhook_event);
 
       // Get the sender PSID
       let sender_psid = webhook_event.sender.id;
@@ -57,12 +59,57 @@ app.post("/webhook", (req, res) => {
       let text = webhook_event.message.text;
       console.log("Text: " + text + "  //");
 
+      if (webhook_event.message) {
+        handleMessages(sender_psid, webhook_event.message);
+      } else if (webhook_event.postback) {
+        handlePostBack(sender_psid, webhook_event.postback);
+      }
     });
     res.status(200).send("EVENTO RECIBIDO");
   } else {
     res.sendStatus(404);
   }
 });
+
+function handleMessages(sender_psid, received_message) {
+  let response;
+  if (received_message.text) {
+    const answer = received_message.text;
+    console.log("Hola! Estoy en el handleMessage" + "\n");
+    console.log("Este es el answer: " + answer + "\n");
+    response = {
+      text: "Tu mensaje fue: " + answer,
+    };
+  }
+  callSendAPI(sender_psid, response);
+}
+
+function handlePostBack(sender_psid, received_postback) {}
+
+function callSendAPI(sender_psid, response) {
+  const requestBody = {
+    recipient: {
+      id: sender_psid,
+    },
+    message: response,
+  };
+
+  request(
+    {
+      url: "https://graph.facebook.com/v18.0/me/messages",
+      qs: { access_token: PAGE_ACCESS_TOKEN },
+      method: "POST",
+      json: requestBody,
+    },
+    (err, res, body) => {
+      if (!err) {
+        console.log("Mensaje enviado de vuelta");
+      } else {
+        console.error("Imposible enviar mensaje");
+      }
+    }
+  );
+}
 
 const ai = async (question) => {
   const loader = new TextLoader("./Texto.txt");
