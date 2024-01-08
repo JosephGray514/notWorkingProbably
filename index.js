@@ -143,7 +143,7 @@ const ai = async (question) => {
   const embeddings = new OpenAIEmbeddings();
   const vectorStore = await FaissStore.load("./", embeddings);
 
-  const model = new OpenAI({ temperature: 0 });
+  const model = new OpenAI({ temperature: 0.5 });
 
   const chain = new RetrievalQAChain({
     combineDocumentsChain: loadQAStuffChain(model),
