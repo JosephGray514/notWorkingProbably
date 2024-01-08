@@ -139,9 +139,6 @@ function callSendAPI(sender_psid, response) {
 }
 
 const ai = async (question) => {
-
-  await upload()
-
   ////////////////
   const embeddings = new OpenAIEmbeddings();
   const vectorStore = await FaissStore.load("./", embeddings);
@@ -169,6 +166,7 @@ app.get("/", async (req, res) => {
 
 // Iniciar el servidor en un puerto específico
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, async() => {
   console.log(`Servidor escuchando en el puerto ${PORT}`);
+  await upload()
 });
