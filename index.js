@@ -16,24 +16,24 @@ import { RetrievalQAChain, loadQAStuffChain } from "langchain/chains";
 
 const app = express().use(bodyParser.json());
 
+const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
+
 /////////////Sube el documento a Faisstore//////////////
-let PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
+const loader = new TextLoader("./Texto.txt");
 
-let loader = new TextLoader("./Texto.txt");
+const docs = await loader.load();
 
-let docs = await loader.load();
-
-let splitter = new CharacterTextSplitter({
+const splitter = new CharacterTextSplitter({
   chunkSize: 200,
   chunkOverlap: 50,
 });
 
-let documents = await splitter.splitDocuments(docs);
+const documents = await splitter.splitDocuments(docs);
 console.log(documents);
 
-let embeddings = new OpenAIEmbeddings();
+const embeddings = new OpenAIEmbeddings();
 
-let vectorstore = await FaissStore.fromDocuments(documents, embeddings);
+const vectorstore = await FaissStore.fromDocuments(documents, embeddings);
 await vectorstore.save("./");
 
 // Ruta para el método GET
@@ -132,11 +132,8 @@ function callSendAPI(sender_psid, response) {
 }
 
 const ai = async (question) => {
-
-
-
   ////////////////
-
+  const embeddings = new OpenAIEmbeddings();
   const vectorStore = await FaissStore.load("./", embeddings);
 
   const model = new OpenAI({ temperature: 0 });
