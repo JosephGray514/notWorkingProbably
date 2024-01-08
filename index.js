@@ -30,6 +30,7 @@ const splitter = new CharacterTextSplitter({
 
 const documents = await splitter.splitDocuments(docs);
 console.log(documents);
+console.log("Documento subido")
 
 const embeddings = new OpenAIEmbeddings();
 
