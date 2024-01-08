@@ -33,7 +33,7 @@ console.log(documents);
 
 let embeddings = new OpenAIEmbeddings();
 
-const vectorstore = await FaissStore.fromDocuments(documents, embeddings);
+let vectorstore = await FaissStore.fromDocuments(documents, embeddings);
 await vectorstore.save("./");
 
 // Ruta para el método GET
@@ -137,7 +137,7 @@ const ai = async (question) => {
 
   ////////////////
 
-  const vectorStore = await FaissStore.load("./", embeddings);
+  vectorStore = await FaissStore.load("./", embeddings);
 
   const model = new OpenAI({ temperature: 0 });
 
@@ -151,7 +151,7 @@ const ai = async (question) => {
     query: question,
   });
 
-  let answer = response.text;
+  const answer = response.text;
 
   return answer;
 };
