@@ -31,7 +31,7 @@ const splitter = new CharacterTextSplitter({
 const documents = await splitter.splitDocuments(docs);
 console.log(documents);
 
-const embeddings = new OpenAIEmbeddings();
+let embeddings = new OpenAIEmbeddings();
 
 const vectorstore = await FaissStore.fromDocuments(documents, embeddings);
 await vectorstore.save("./");
