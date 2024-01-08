@@ -137,7 +137,7 @@ const ai = async (question) => {
 
   ////////////////
 
-  vectorStore = await FaissStore.load("./", embeddings);
+  const vectorStore = await FaissStore.load("./", embeddings);
 
   const model = new OpenAI({ temperature: 0 });
 
