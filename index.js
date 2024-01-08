@@ -17,18 +17,18 @@ import { RetrievalQAChain, loadQAStuffChain } from "langchain/chains";
 const app = express().use(bodyParser.json());
 
 /////////////Sube el documento a Faisstore//////////////
-const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
+let PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
-const loader = new TextLoader("./Texto.txt");
+let loader = new TextLoader("./Texto.txt");
 
-const docs = await loader.load();
+let docs = await loader.load();
 
-const splitter = new CharacterTextSplitter({
+let splitter = new CharacterTextSplitter({
   chunkSize: 200,
   chunkOverlap: 50,
 });
 
-const documents = await splitter.splitDocuments(docs);
+let documents = await splitter.splitDocuments(docs);
 console.log(documents);
 
 let embeddings = new OpenAIEmbeddings();
