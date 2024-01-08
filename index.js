@@ -1,6 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
-import request from 'request'
+import request from "request";
 import { config } from "dotenv";
 config();
 
@@ -16,7 +16,25 @@ import { RetrievalQAChain, loadQAStuffChain } from "langchain/chains";
 
 const app = express().use(bodyParser.json());
 
+/////////////Sube el documento a Faisstore//////////////
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
+
+const loader = new TextLoader("./Texto.txt");
+
+const docs = await loader.load();
+
+const splitter = new CharacterTextSplitter({
+  chunkSize: 200,
+  chunkOverlap: 50,
+});
+
+const documents = await splitter.splitDocuments(docs);
+console.log(documents);
+
+const embeddings = new OpenAIEmbeddings();
+
+const vectorstore = await FaissStore.fromDocuments(documents, embeddings);
+await vectorstore.save("./");
 
 // Ruta para el método GET
 app.get("/webhook", (req, res) => {
@@ -75,10 +93,10 @@ app.post("/webhook", (req, res) => {
 async function handleMessages(sender_psid, received_message) {
   let response;
   if (received_message.text) {
-    const answer = received_message.text;
+    const question = received_message.text;
     console.log("Hola! Estoy en el handleMessage" + "\n");
-    console.log("Este es el answer: " + answer + "\n");
-    const  aiRespond = await ai(answer)
+    console.log("Este es el question: " + question + "\n");
+    const aiRespond = await ai(question);
     response = {
       text: aiRespond,
     };
@@ -114,22 +132,8 @@ function callSendAPI(sender_psid, response) {
 }
 
 const ai = async (question) => {
-  const loader = new TextLoader("./Texto.txt");
 
-  const docs = await loader.load();
 
-  const splitter = new CharacterTextSplitter({
-    chunkSize: 200,
-    chunkOverlap: 50,
-  });
-
-  const documents = await splitter.splitDocuments(docs);
-  console.log(documents);
-
-  const embeddings = new OpenAIEmbeddings();
-
-  const vectorstore = await FaissStore.fromDocuments(documents, embeddings);
-  await vectorstore.save("./");
 
   ////////////////
 
