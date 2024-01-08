@@ -19,26 +19,31 @@ const app = express().use(bodyParser.json());
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
 /////////////Sube el documento a Faisstore//////////////
-const loader = new TextLoader("./Texto.txt");
 
-const docs = await loader.load();
+const upload = async () => {
+  const loader = new TextLoader("./Texto.txt");
 
-const splitter = new CharacterTextSplitter({
-  chunkSize: 200,
-  chunkOverlap: 50,
-});
+  const docs = await loader.load();
 
-const documents = await splitter.splitDocuments(docs);
-console.log(documents);
-console.log("Documento subido")
+  const splitter = new CharacterTextSplitter({
+    chunkSize: 200,
+    chunkOverlap: 50,
+  });
 
-const embeddings = new OpenAIEmbeddings();
+  const documents = await splitter.splitDocuments(docs);
+  console.log(documents);
+  console.log("Documento subido");
 
-const vectorstore = await FaissStore.fromDocuments(documents, embeddings);
-await vectorstore.save("./");
+  const embeddings = new OpenAIEmbeddings();
+
+  const vectorstore = await FaissStore.fromDocuments(documents, embeddings);
+  await vectorstore.save("./");
+};
+
+
 
 // Ruta para el método GET
-app.get("/webhook", (req, res) => {
+app.get("/webhook", async(req, res) => {
   console.log("GET: webhook");
 
   const VERIFY_TOKEN = "stringUnicoParaTuAplicacion";
@@ -57,10 +62,12 @@ app.get("/webhook", (req, res) => {
   } else {
     res.sendStatus(404);
   }
+  
 });
 
 // Ruta para el método POST
-app.post("/webhook", (req, res) => {
+app.post("/webhook", async(req, res) => {
+  await upload()
   console.log("POST: webhook");
 
   const body = req.body;
