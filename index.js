@@ -62,12 +62,11 @@ app.get("/webhook", async(req, res) => {
   } else {
     res.sendStatus(404);
   }
-  
+
 });
 
 // Ruta para el método POST
 app.post("/webhook", async(req, res) => {
-  await upload()
   console.log("POST: webhook");
 
   const body = req.body;
@@ -140,6 +139,9 @@ function callSendAPI(sender_psid, response) {
 }
 
 const ai = async (question) => {
+
+  await upload()
+
   ////////////////
   const embeddings = new OpenAIEmbeddings();
   const vectorStore = await FaissStore.load("./", embeddings);
