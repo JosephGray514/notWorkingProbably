@@ -4,44 +4,9 @@ import request from "request";
 import { config } from "dotenv";
 config();
 
-import { TextLoader } from "langchain/document_loaders/fs/text";
-import { CharacterTextSplitter } from "langchain/text_splitter";
-
-///////////
-
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { FaissStore } from "langchain/vectorstores/faiss";
-import { OpenAI } from "langchain/llms/openai";
-import { RetrievalQAChain, loadQAStuffChain } from "langchain/chains";
-
 const app = express().use(bodyParser.json());
 
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
-
-/////////////Sube el documento a Faisstore//////////////
-
-const upload = async () => {
-  const loader = new TextLoader("./Texto.txt");
-
-  const docs = await loader.load();
-
-  const splitter = new CharacterTextSplitter({
-    chunkSize: 200,
-    chunkOverlap: 50,
-  });
-
-  const documents = await splitter.splitDocuments(docs);
-  if (documents) {
-    console.log("Documento subido");
-  }
-  
-  const embeddings = new OpenAIEmbeddings();
-
-  const vectorstore = await FaissStore.fromDocuments(documents, embeddings);
-  await vectorstore.save("./");
-};
-
-
 
 // Ruta para el método GET
 app.get("/webhook", async(req, res) => {
@@ -101,10 +66,6 @@ app.post("/webhook", async(req, res) => {
 async function handleMessages(sender_psid, received_message) {
   let response;
   if (received_message.text) {
-    const question = received_message.text;
-    console.log("Hola! Estoy en el handleMessage" + "\n");
-    console.log("Este es el question: " + question + "\n");
-    const aiRespond = await ai(question);
     response = {
       text: "Escribiste esto : "+ received_message.text,
     };
@@ -139,28 +100,6 @@ function callSendAPI(sender_psid, response) {
   );
 }
 
-const ai = async (question) => {
-  ////////////////
-  const embeddings = new OpenAIEmbeddings();
-  const vectorStore = await FaissStore.load("./", embeddings);
-
-  const model = new OpenAI({ temperature: 0.2 });
-
-  const chain = new RetrievalQAChain({
-    combineDocumentsChain: loadQAStuffChain(model),
-    retriever: vectorStore.asRetriever(),
-    returnSourceDocuments: true,
-  });
-
-  const response = await chain.call({
-    query: question,
-  });
-
-  const answer = response.text;
-
-  return answer;
-};
-
 app.get("/", async (req, res) => {
   res.status(200).send("Hola");
 
@@ -170,5 +109,4 @@ app.get("/", async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async() => {
   console.log(`Servidor escuchando en el puerto ${PORT}`);
-  await upload()
 });
