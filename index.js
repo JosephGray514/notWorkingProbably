@@ -31,9 +31,10 @@ const upload = async () => {
   });
 
   const documents = await splitter.splitDocuments(docs);
-  console.log(documents);
-  console.log("Documento subido");
-
+  if (documents) {
+    console.log("Documento subido");
+  }
+  
   const embeddings = new OpenAIEmbeddings();
 
   const vectorstore = await FaissStore.fromDocuments(documents, embeddings);
@@ -46,7 +47,7 @@ const upload = async () => {
 app.get("/webhook", async(req, res) => {
   console.log("GET: webhook");
 
-  const VERIFY_TOKEN = "stringUnicoParaTuAplicacion";
+  const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
@@ -105,7 +106,7 @@ async function handleMessages(sender_psid, received_message) {
     console.log("Este es el question: " + question + "\n");
     const aiRespond = await ai(question);
     response = {
-      text: aiRespond,
+      text: "Escribiste esto : "+ received_message.text,
     };
   }
   callSendAPI(sender_psid, response);
@@ -143,7 +144,7 @@ const ai = async (question) => {
   const embeddings = new OpenAIEmbeddings();
   const vectorStore = await FaissStore.load("./", embeddings);
 
-  const model = new OpenAI({ temperature: 0.5 });
+  const model = new OpenAI({ temperature: 0.2 });
 
   const chain = new RetrievalQAChain({
     combineDocumentsChain: loadQAStuffChain(model),
@@ -162,6 +163,7 @@ const ai = async (question) => {
 
 app.get("/", async (req, res) => {
   res.status(200).send("Hola");
+
 });
 
 // Iniciar el servidor en un puerto específico
